@@ -1,0 +1,38 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: vagrant
+  provider:
+    name: virtualbox
+platforms:
+  - name: ub20
+    box: ubuntu/focal64
+    memory: 1024
+    instance_raw_config_args:
+      - "vm.network 'forwarded_port', guest: 80, host: 8120"
+  - name: ub22
+    box: ubuntu/jammy64
+    memory: 1024
+    instance_raw_config_args:
+      - "vm.network 'forwarded_port', guest: 80, host: 8122"
+provisioner:
+  name: ansible
+  # config_options:
+  #   defaults:
+  #     # Show tasks timing and results at end of play
+  #     callbacks_enabled: ansible.posix.profile_tasks
+  env:
+    # Allows placing roles in whatever path
+    ANSIBLE_ROLES_PATH: ../../roles
+  inventory:
+    group_vars:
+      all:
+        apache_website_name: example
+        mysql_db_host: localhost
+        mysql_db_user: user
+        mysql_db_pass: pass
+        mysql_db_name: app_db
+        mysql_root_password: supersecret
+verifier:
+  name: ansible
