@@ -2,12 +2,12 @@
 # To learn more about the format of this file, see https://docs.trunk.io/reference/trunk-yaml
 version: 0.1
 cli:
-  version: 1.16.2
+  version: 1.17.0
 plugins:
   sources:
-    - id: configs
-      ref: v1.1.0
-      uri: https://github.com/GustavoAV/trunk-configs
     - id: trunk
       ref: v1.2.5
       uri: https://github.com/trunk-io/plugins
+    - id: configs
+      ref: v1.2.0
+      uri: https://github.com/GustavoAV/trunk-configs
