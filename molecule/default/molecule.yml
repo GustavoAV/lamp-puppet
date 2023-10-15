@@ -28,11 +28,17 @@ provisioner:
   inventory:
     group_vars:
       all:
-        apache_website_name: example
-        mysql_db_host: localhost
-        mysql_db_user: user
-        mysql_db_pass: pass
-        mysql_db_name: app_db
-        mysql_root_password: supersecret
+        # Puppet role variables: https://github.com/geerlingguy/ansible-role-puppet#role-variables
+        puppet_version: 8
+        puppet_service_manage: true
+        puppet_service_enabled: true
+        puppet_default_memory: 512m
+        # Local role variables
+        # apache_website_name: example
+        # mysql_db_host: localhost
+        # mysql_db_user: user
+        # mysql_db_pass: pass
+        # mysql_db_name: app_db
+        # mysql_root_password: supersecret
 verifier:
   name: ansible

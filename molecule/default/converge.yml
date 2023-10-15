@@ -3,13 +3,5 @@
   hosts: all
   diff: true
   become: true
-
-  pre_tasks:
-    # Avoids error in "geerlingguy.puppet"
-    - name: Update apt cache
-      ansible.builtin.apt:
-        update_cache: true
-        cache_valid_time: 600
-
   roles:
     - geerlingguy.puppet
