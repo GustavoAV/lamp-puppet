@@ -29,11 +29,10 @@ provisioner:
     group_vars:
       all:
         # Puppet role variables: https://github.com/geerlingguy/ansible-role-puppet#role-variables
-        puppet_version: 8
+        puppet_default_memory: 512m
         puppet_service_manage: true
         puppet_service_enabled: true
-        puppet_default_memory: 512m
-        # Local role variables
+        # # Local role variables
         # apache_website_name: example
         # mysql_db_host: localhost
         # mysql_db_user: user

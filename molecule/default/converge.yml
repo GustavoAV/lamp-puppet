@@ -3,5 +3,7 @@
   hosts: all
   diff: true
   become: true
-  roles:
-    - geerlingguy.puppet
+  tasks:
+    - name: Include Puppet install role
+      ansible.builtin.include_role:
+        name: geerlingguy.puppet
