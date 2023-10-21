@@ -7,3 +7,49 @@
     - name: Include Puppet install role
       ansible.builtin.include_role:
         name: geerlingguy.puppet
+
+    - name: Start and enable Puppet server
+      ansible.builtin.systemd:
+        name: puppetserver
+        state: started
+        enabled: true
+      when: inventory_hostname == "server"
+
+    # Agent config: https://www.puppet.com/docs/puppet/8/install_agents
+
+    - name: Add hosts entry to Puppet server
+      ansible.builtin.lineinfile:
+        path: /etc/hosts
+        line: "{{ puppet_server_ip }} {{ puppet_server_name }}"
+        state: present
+
+    - name: Configure server setting
+      ansible.builtin.blockinfile:
+        path: "{{ puppet_agent_config_path }}/puppet.conf"
+        block: |
+          [main]
+          server = {{ puppet_server_name }}
+        state: present
+        backup: true
+      when: inventory_hostname == "agent"
+
+    - name: Start and enable Puppet agent
+      ansible.builtin.systemd:
+        name: puppet
+        state: started
+        enabled: true
+      when: inventory_hostname == "agent"
+
+    - name: Sign server certs
+      ansible.builtin.command:
+        cmd: "{{ puppet_server_bin }} ca sign --all"
+        creates: "{{ puppet_server_config_path }}/ca/signed/agent..pem"
+      when: inventory_hostname == "server"
+
+    - name: Connect agent to server
+      ansible.builtin.command:
+        cmd: "{{ puppet_agent_bin }} ssl bootstrap"
+        # creates: "{{ puppet_agent_config_path }}/ssl/certs/ca.pem"
+      when: inventory_hostname == "agent"
+      register: puppet_bootstrap_cmd
+      changed_when: puppet_bootstrap_cmd.rc != 0

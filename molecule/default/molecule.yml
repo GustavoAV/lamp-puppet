@@ -6,16 +6,16 @@ driver:
   provider:
     name: virtualbox
 platforms:
-  - name: ub20
-    box: ubuntu/focal64
-    memory: 1024
-    instance_raw_config_args:
-      - "vm.network 'forwarded_port', guest: 80, host: 8120"
-  - name: ub22
+  - name: server
     box: ubuntu/jammy64
     memory: 1024
     instance_raw_config_args:
-      - "vm.network 'forwarded_port', guest: 80, host: 8122"
+      - 'vm.network "private_network", ip: "192.168.56.20"'
+  - name: agent
+    box: ubuntu/jammy64
+    memory: 1024
+    instance_raw_config_args:
+      - 'vm.network "private_network", ip: "192.168.56.22"'
 provisioner:
   name: ansible
   # config_options:
@@ -28,10 +28,17 @@ provisioner:
   inventory:
     group_vars:
       all:
-        # Puppet role variables: https://github.com/geerlingguy/ansible-role-puppet#role-variables
+        # Puppet role variables: https://github.com/GustavoAV/ansible-role-puppet#role-variables
         puppet_default_memory: 512m
-        puppet_service_manage: true
-        puppet_service_enabled: true
+        puppet_server_ip: 192.168.56.20
+        puppet_agent_bin: /opt/puppetlabs/puppet/bin/puppet
+        puppet_server_bin: /opt/puppetlabs/server/apps/puppetserver/bin/puppetserver
+        puppet_agent_config_path: /etc/puppetlabs/puppet
+        puppet_server_config_path: /etc/puppetlabs/puppetserver
+        # Needs to be "puppet": https://stackoverflow.com/a/58540455
+        puppet_server_name: puppet
+        # puppet_service_manage: true
+        # puppet_service_enabled: true
         # # Local role variables
         # apache_website_name: example
         # mysql_db_host: localhost
