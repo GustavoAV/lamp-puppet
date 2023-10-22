@@ -24,12 +24,13 @@
         state: present
 
     - name: Configure server setting
-      ansible.builtin.blockinfile:
+      community.general.ini_file:
         path: "{{ puppet_agent_config_path }}/puppet.conf"
-        block: |
-          [main]
-          server = {{ puppet_server_name }}
+        section: main
+        option: server
+        value: "{{ puppet_server_name }}"
         state: present
+        mode: "0644"
         backup: true
       when: inventory_hostname == "agent"
 

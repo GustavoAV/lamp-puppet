@@ -1,4 +1,7 @@
 ---
+collections:
+  - name: community.general
+
 roles:
   - name: geerlingguy.puppet
     src: https://github.com/GustavoAV/ansible-role-puppet
