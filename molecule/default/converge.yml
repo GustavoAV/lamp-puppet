@@ -46,11 +46,17 @@
         cmd: "{{ puppet_server_bin }} ca sign --all"
         creates: "{{ puppet_server_config_path }}/ca/signed/agent..pem"
       when: inventory_hostname == "server"
+      register: puppet_server_certs_sign
+      delay: 5
+      retries: 10
+      until: puppet_server_certs_sign is not failed
 
     - name: Connect agent to server
       ansible.builtin.command:
         cmd: "{{ puppet_agent_bin }} ssl bootstrap"
-        # creates: "{{ puppet_agent_config_path }}/ssl/certs/ca.pem"
       when: inventory_hostname == "agent"
       register: puppet_bootstrap_cmd
+      delay: 5
+      retries: 10
+      until: puppet_bootstrap_cmd is not failed
       changed_when: puppet_bootstrap_cmd.rc != 0
