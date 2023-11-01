@@ -11,11 +11,12 @@ platforms:
     memory: 1024
     instance_raw_config_args:
       - 'vm.network "private_network", ip: "192.168.56.20"'
-  - name: agent
+  - name: agent-ubuntu
     box: ubuntu/jammy64
     memory: 1024
     instance_raw_config_args:
       - 'vm.network "private_network", ip: "192.168.56.22"'
+      - "vm.network 'forwarded_port', guest: 80, host: 8022"
 provisioner:
   name: ansible
   # config_options:
@@ -30,16 +31,6 @@ provisioner:
       all:
         # Puppet role variables: https://github.com/GustavoAV/ansible-role-puppet#role-variables
         puppet_default_memory: 512m
-        puppet_agent_name: agent
-        puppet_agent_ip: 192.168.56.22
-        puppet_agent_bin: /opt/puppetlabs/puppet/bin/puppet
-        puppet_agent_config_path: /etc/puppetlabs/puppet
-        # Needs to be "puppet": https://stackoverflow.com/a/58540455
-        puppet_server_name: puppet
-        puppet_server_ip: 192.168.56.20
-        puppet_server_bin: /opt/puppetlabs/server/apps/puppetserver/bin/puppetserver
-        puppet_server_config_path: /etc/puppetlabs/puppetserver
-        puppet_server_log_path: /var/log/puppetlabs/puppetserver
         # puppet_service_manage: true
         # puppet_service_enabled: true
         # # Local role variables
