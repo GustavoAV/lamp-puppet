@@ -16,6 +16,13 @@
       {{ puppet_server_ip }} {{ puppet_server_fqdn }} puppet
     state: present
 
+- name: Allow all requests
+  ansible.builtin.command:
+    cmd: sed -i 's|$1|*|' /etc/puppetlabs/puppetserver/conf.d/auth.conf
+  register: puppet_auth_replace
+  changed_when: puppet_auth_replace.rc != 0
+  when: inventory_hostname == "server"
+
 - name: Configure dns_alt_names
   community.general.ini_file:
     path: "{{ puppet_conf_dir }}/puppet.conf"
@@ -75,34 +82,36 @@
   register: puppet_bootstrap_cmd
   changed_when: puppet_bootstrap_cmd.rc != 0
 
-# - name: Create modules dir
-#   ansible.builtin.file:
-#     path: "{{ puppet_server_modules_dir }}"
-#     mode: "0755"
-#     state: directory
-#   when: inventory_hostname == "server"
+- name: Create modules dir
+  ansible.builtin.file:
+    path: "{{ puppet_server_modules_dir }}"
+    mode: "0755"
+    state: directory
+  when: inventory_hostname == "server"
 
-# - name: Copy the LAMP module
-#   ansible.builtin.copy:
-#     src: init.pp
-#     dest: "{{ puppet_server_modules_dir }}/init.pp"
-#     mode: "0644"
-#   when: inventory_hostname == "server"
+- name: Copy the LAMP module
+  ansible.builtin.copy:
+    src: init.pp
+    dest: "{{ puppet_server_modules_dir }}/init.pp"
+    mode: "0644"
+  when: inventory_hostname == "server"
 
-# - name: Create manifests dir
-#   ansible.builtin.file:
-#     path: "{{ puppet_agent_manifests_dir }}"
-#     mode: "0755"
-#     state: directory
-#   when: inventory_hostname == "agent-ubuntu"
+- name: Create manifests dir
+  ansible.builtin.file:
+    path: "{{ puppet_agent_manifests_dir }}"
+    mode: "0755"
+    state: directory
+  when: inventory_hostname == "agent-ubuntu"
 
-# - name: Copy the LAMP manifest
-#   ansible.builtin.copy:
-#     src: site.pp
-#     dest: "{{ puppet_agent_manifests_dir }}/site.pp"
-#     mode: "0644"
-#   when: inventory_hostname == "agent-ubuntu"
+- name: Copy the LAMP manifest
+  ansible.builtin.copy:
+    src: site.pp
+    dest: "{{ puppet_agent_manifests_dir }}/site.pp"
+    mode: "0644"
+  when: inventory_hostname == "agent-ubuntu"
 
-# - name: Run Puppet
-#   # trunk-ignore(yamllint/empty-values)
-#   community.general.puppet:
+# There are errors, but it runs
+- name: Run Puppet
+  # trunk-ignore(yamllint/empty-values)
+  community.general.puppet:
+  when: inventory_hostname == "agent-ubuntu"
