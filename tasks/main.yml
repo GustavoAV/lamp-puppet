@@ -34,7 +34,6 @@
     file: modules_manifests.yml
   when: inventory_hostname == "server"
 
-# There are errors, but it runs
 - name: Run Puppet
   # trunk-ignore(yamllint/empty-values)
   community.general.puppet:
