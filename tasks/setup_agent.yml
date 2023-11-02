@@ -1,0 +1,16 @@
+---
+- name: Configure server setting
+  community.general.ini_file:
+    path: "{{ puppet_conf_dir }}/puppet.conf"
+    section: main
+    option: server
+    value: "{{ puppet_server_fqdn }}"
+    state: present
+    mode: "0644"
+    backup: true
+
+- name: Start and enable Puppet agent
+  ansible.builtin.service:
+    name: puppet
+    state: started
+    enabled: true

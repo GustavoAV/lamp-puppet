@@ -1,0 +1,22 @@
+---
+- name: Allow all requests
+  ansible.builtin.command:
+    cmd: sed -i 's|$1|*|' /etc/puppetlabs/puppetserver/conf.d/auth.conf
+  register: puppet_auth_replace
+  changed_when: puppet_auth_replace.rc != 0
+
+- name: Configure dns_alt_names
+  community.general.ini_file:
+    path: "{{ puppet_conf_dir }}/puppet.conf"
+    section: main
+    option: dns_alt_names
+    value: "puppet,{{ puppet_server_fqdn }}"
+    state: present
+    mode: "0644"
+    backup: true
+
+- name: Start and enable Puppet server
+  ansible.builtin.systemd:
+    name: puppetserver
+    state: started
+    enabled: true

@@ -1,0 +1,24 @@
+---
+- name: Create modules dir
+  ansible.builtin.file:
+    path: "{{ puppet_modules_dir }}"
+    mode: "0755"
+    state: directory
+
+- name: Copy the LAMP module
+  ansible.builtin.copy:
+    src: init.pp
+    dest: "{{ puppet_modules_dir }}/init.pp"
+    mode: "0644"
+
+- name: Create manifests dir
+  ansible.builtin.file:
+    path: "{{ puppet_manifests_dir }}"
+    mode: "0755"
+    state: directory
+
+- name: Copy the LAMP manifest
+  ansible.builtin.template:
+    src: site.pp.j2
+    dest: "{{ puppet_manifests_dir }}/site.pp"
+    mode: "0644"

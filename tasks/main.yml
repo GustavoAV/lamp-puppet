@@ -10,104 +10,28 @@
 - name: Add /etc/hosts content
   ansible.builtin.blockinfile:
     path: /etc/hosts
-    # Server name needs to be "puppet": https://stackoverflow.com/a/58540455
     block: |
-      {{ puppet_agent_ip }} {{ puppet_agent_fqdn }} agent-ubuntu
-      {{ puppet_server_ip }} {{ puppet_server_fqdn }} puppet
+      {{ puppet_agent_ip }} {{ puppet_agent_fqdn }} {{ puppet_agent_hostname }}
+      {{ puppet_server_ip }} {{ puppet_server_fqdn }} {{ puppet_server_hostname }}
     state: present
 
-- name: Allow all requests
-  ansible.builtin.command:
-    cmd: sed -i 's|$1|*|' /etc/puppetlabs/puppetserver/conf.d/auth.conf
-  register: puppet_auth_replace
-  changed_when: puppet_auth_replace.rc != 0
+- name: Server setup
+  ansible.builtin.include_tasks:
+    file: setup_server.yml
   when: inventory_hostname == "server"
 
-- name: Configure dns_alt_names
-  community.general.ini_file:
-    path: "{{ puppet_conf_dir }}/puppet.conf"
-    section: main
-    option: dns_alt_names
-    value: "puppet,{{ puppet_server_fqdn }}"
-    state: present
-    mode: "0644"
-    backup: true
-  when: inventory_hostname == "server"
-
-- name: Start and enable Puppet server
-  ansible.builtin.systemd:
-    name: puppetserver
-    state: started
-    enabled: true
-  when: inventory_hostname == "server"
-
-- name: Configure server setting
-  community.general.ini_file:
-    path: "{{ puppet_conf_dir }}/puppet.conf"
-    section: main
-    option: server
-    value: "{{ puppet_server_fqdn }}"
-    state: present
-    mode: "0644"
-    backup: true
+- name: Agent setup
+  ansible.builtin.include_tasks:
+    file: setup_agent.yml
   when: inventory_hostname == "agent-ubuntu"
 
-- name: Start and enable Puppet agent
-  ansible.builtin.service:
-    name: puppet
-    state: started
-    enabled: true
-  when: inventory_hostname == "agent-ubuntu"
+- name: Ssl bootstrap
+  ansible.builtin.include_tasks:
+    file: ssl_bootstrap.yml
 
-- name: Try to connect agent to server
-  ansible.builtin.script:
-    cmd: puppet_bootstrap_try.sh
-    creates: "{{ puppet_try_file }}"
-  register: puppet_bootstrap_try
-  delay: 6
-  retries: 10
-  until: puppet_bootstrap_try is not failed
-  when: inventory_hostname == "agent-ubuntu"
-
-- name: Sign agent cert request
-  ansible.builtin.command:
-    cmd: "{{ puppet_server_bin }} ca sign --certname {{ puppet_agent_hostname }}."
-    creates: "{{ puppet_server_config_dir }}/ca/signed/{{ puppet_agent_hostname }}..pem"
-  when: inventory_hostname == "server"
-
-- name: Connect agent to server
-  ansible.builtin.command:
-    cmd: "{{ puppet_agent_bin }} ssl bootstrap"
-  when: inventory_hostname == "agent-ubuntu"
-  register: puppet_bootstrap_cmd
-  changed_when: puppet_bootstrap_cmd.rc != 0
-
-- name: Create modules dir
-  ansible.builtin.file:
-    path: "{{ puppet_modules_dir }}"
-    mode: "0755"
-    state: directory
-  when: inventory_hostname == "server"
-
-- name: Copy the LAMP module
-  ansible.builtin.copy:
-    src: init.pp
-    dest: "{{ puppet_modules_dir }}/init.pp"
-    mode: "0644"
-  when: inventory_hostname == "server"
-
-- name: Create manifests dir
-  ansible.builtin.file:
-    path: "{{ puppet_manifests_dir }}"
-    mode: "0755"
-    state: directory
-  when: inventory_hostname == "server"
-
-- name: Copy the LAMP manifest
-  ansible.builtin.template:
-    src: site.pp.j2
-    dest: "{{ puppet_manifests_dir }}/site.pp"
-    mode: "0644"
+- name: Copy modules and manifests
+  ansible.builtin.include_tasks:
+    file: modules_manifests.yml
   when: inventory_hostname == "server"
 
 # There are errors, but it runs
