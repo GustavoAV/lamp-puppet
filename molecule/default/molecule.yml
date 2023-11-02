@@ -19,10 +19,10 @@ platforms:
       - "vm.network 'forwarded_port', guest: 80, host: 8022"
 provisioner:
   name: ansible
-  # config_options:
-  #   defaults:
-  #     # Show tasks timing and results at end of play
-  #     callbacks_enabled: ansible.posix.profile_tasks
+  config_options:
+    defaults:
+      # Show tasks timing and results at end of play
+      callbacks_enabled: ansible.posix.profile_tasks
   env:
     # Allows placing roles in whatever path
     ANSIBLE_ROLES_PATH: ../../roles
