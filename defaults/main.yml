@@ -6,6 +6,7 @@ puppet_agent_ip: 192.168.56.22
 puppet_agent_hostname: agent-ubuntu
 puppet_agent_fqdn: agent-ubuntu.example.com
 puppet_agent_bin: /opt/puppetlabs/puppet/bin/puppet
+puppet_agent_validate_cmd: "{{ puppet_agent_bin }} parser validate"
 
 puppet_server_ip: 192.168.56.20
 # Server name needs to be "puppet": https://stackoverflow.com/a/58540455

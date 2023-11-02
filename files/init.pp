@@ -1,3 +1,4 @@
+# Configures LAMP stack
 class lamp {
   # execute 'apt-get update'
   exec { 'apt-update':                    # exec resource named 'apt-update'
@@ -6,8 +7,8 @@ class lamp {
 
   # install apache2 package
   package { 'apache2':
+    ensure  => installed,
     require => Exec['apt-update'],        # require 'apt-update' before installing
-    ensure => installed,
   }
 
   # ensure apache2 service is running
@@ -17,8 +18,8 @@ class lamp {
 
   # install mysql-server package
   package { 'mysql-server':
+    ensure  => installed,
     require => Exec['apt-update'],        # require 'apt-update' before installing
-    ensure => installed,
   }
 
   # ensure mysql service is running
@@ -28,12 +29,12 @@ class lamp {
 
   # install php package
   package { 'php':
+    ensure  => installed,
     require => Exec['apt-update'],        # require 'apt-update' before installing
-    ensure => installed,
   }
   # ensure info.php file exists
   file { '/var/www/html/info.php':
-    ensure => file,
+    ensure  => file,
     content => '',    # phpinfo code
     require => Package['apache2'],        # require 'apache2' package before creating
   }
