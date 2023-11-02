@@ -16,5 +16,5 @@ puppet_server_bin: /opt/puppetlabs/server/apps/puppetserver/bin/puppetserver
 puppet_server_config_dir: /etc/puppetlabs/puppetserver
 puppet_server_log_dir: /var/log/puppetlabs/puppetserver
 
-puppet_modules_dir: /etc/puppetlabs/code/modules/lamp/manifests
 puppet_manifests_dir: /etc/puppetlabs/code/environments/production/manifests
+puppet_modules_dir: /etc/puppetlabs/code/environments/production/modules
