@@ -1,0 +1,4 @@
+---
+name: lamp
+modules:
+  - puppetlabs/mysql

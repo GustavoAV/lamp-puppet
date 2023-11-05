@@ -2,12 +2,52 @@
 - name: Converge
   hosts: all
   diff: true
-  become: true
+  # become: true
   tasks:
-    - name: Include Puppet install role
-      ansible.builtin.include_role:
-        name: geerlingguy.puppet
+    - name: Install openssh-client
+      ansible.builtin.apt:
+        name: openssh-client
+        state: present
+        update_cache: true
+      become: true
 
-    - name: Include Lamp-Puppet role
-      ansible.builtin.include_role:
-        name: lamp-puppet
+    - name: Create SSH key pair
+      community.crypto.openssh_keypair:
+        path: /tmp/bolt
+        state: present
+        type: ed25519
+        mode: "0600"
+      register: bolt_keypair
+
+    - name: Add to authorized_keys
+      ansible.builtin.lineinfile:
+        path: /root/.ssh/authorized_keys
+        line: "{{ bolt_keypair.public_key }}"
+      become: true
+
+    - name: Copy private key to host
+      ansible.builtin.fetch:
+        src: /tmp/bolt
+        dest: /tmp
+      register: bolt_keypair_local
+
+    - name: Install puppet mysql module
+      ansible.builtin.command:
+        cmd: "{{ puppet_bolt_bin }} module install"
+        creates: .modules/
+        chdir: ../../
+      delegate_to: localhost
+
+    # https://www.tecmint.com/fix-ssh-too-many-authentication-failures-error/
+
+    - name: Apply manifest
+      ansible.builtin.command:
+        cmd: >
+          {{ puppet_bolt_bin }} apply site.pp
+            --no-host-key-check
+            --private-key {{ bolt_keypair_local.dest }}
+            --targets {{ puppet_target_ip }}
+            --user root
+        chdir: ../../
+      changed_when: true
+      delegate_to: localhost
