@@ -31,7 +31,7 @@
         dest: /tmp
       register: bolt_keypair_local
 
-    - name: Install puppet mysql module
+    - name: Install puppet modules
       ansible.builtin.command:
         cmd: "{{ puppet_bolt_bin }} module install"
         creates: .modules/
