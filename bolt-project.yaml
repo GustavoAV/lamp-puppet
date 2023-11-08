@@ -2,4 +2,3 @@
 name: lamp
 modules:
 - puppetlabs/mysql
-- puppetlabs/apache
